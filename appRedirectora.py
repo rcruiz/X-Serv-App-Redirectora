@@ -1,41 +1,34 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*-
+
 """
 Aplicacion redirectora
 Rosa Cristina Ruiz Rivas
-Alumna de SAT
 """
 
-import socket
+import webapp
 import random
 
-# Crea un socket sobre TCP y se conecta a un determinado puerto
-port = 1234
-mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-mySocket.bind(('localhost', port))
 
-# Podra escuchar hasta 5 conexiones TCP
-mySocket.listen(5)
+class redirectora(webapp.webApp):
+    """Address with classes"""
 
-# Acepta las conexiones, lee datos entrantes y responde en una pagina HTML
-try:
-    while True:
-        print 'Waiting for connections'
-        (recvSocket, address) = mySocket.accept()
-        print 'Request received:'
-        print recvSocket.recv(2048)
-        # Genera las URLs aleatorias
+    def process(self, parsedRequest):
+        """Process the relevant elements of the request.
+
+        Returns 200 OK and an HTML page.
+        """
+        #recurso = parsedRequest[1]
         randomURL = str(random.randint(0, 1000000000))
-        newURL = "http://localhost:" + str(port) + "/" + randomURL
-        head = "<html><head>"
-        # Espera 7 segs antes de redirigir
-        head += '<meta http-equiv="Refresh" content="7;url=' + newURL + '">'
-        head += "</head>"
-        recvSocket.send("HTTP/1.1 303 See Others\r\n\r\n" + head +
-                        "<body><p>" + "Va a ser redirigido en 7 segundos a: " +
-                        newURL + "</p></body></html>" + "\r\n")
-        recvSocket.close()
-except KeyboardInterrupt:
-        print "Closing binded socket"
-        mySocket.close()
+        newURL = "http://localhost:1234/" + randomURL
+        # Espera 5 segs antes de redirigir
+        headHtml = '<meta http-equiv="Refresh" content="5;url=' + newURL + '">'
+        codigoHTTP = "303 See Others"
+        cuerpoHtml = "<p>Va a ser redirigido en 5 segundos a --> " + newURL
+        cuerpoHtml += "</p>"
+        return (codigoHTTP, "<HTML> <HEAD>" + headHtml + "</HEAD> <BODY>" +
+                cuerpoHtml + "</BODY></HTML>")
+
+
+if __name__ == "__main__":
+
+    testWebApp = redirectora("localhost", 1234)
